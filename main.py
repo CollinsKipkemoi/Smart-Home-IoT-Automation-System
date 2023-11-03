@@ -1,4 +1,5 @@
 import random
+import time
 
 
 class Device:
@@ -43,6 +44,18 @@ class SmartLight(Device):
         if brightness == 0:
             self.turn_off()
 
+    def gradual_dimming(self, target_brightness: int, duration: float):
+        if target_brightness > self.brightness:
+            raise LightException("The target brightness cannot be greater than the brightness of the device")
+        elif target_brightness < 0:
+            raise LightException("Target brightness cannot be less than 0")
+        else:
+            steps = (self.brightness - target_brightness) / duration
+            while self.brightness > target_brightness:
+                self.adjust_brightness(self.brightness - steps)
+                time.sleep(1)
+                print(self.__str__())
+
     def __str__(self) -> str:
         return f"Device: Smart Light Device Id: {self.id} Brightness: {self.brightness} Status: {self.status}"
 
@@ -53,7 +66,18 @@ class Thermostat(Device):
         self.temperature = 0
 
     def set_temperature(self, temp):
-        self.temperature = temp
+        if temp > 40 or temp < 0:
+            raise ValueError("Temperature cannot be more than 40 or less than 0")
+        else:
+            if temp > 0:
+                self.turn_on()
+                self.temperature = temp
+            else:
+                self.turn_off()
+                self.temperature = temp
+
+    def __str__(self):
+        return f"Device: Thermostat Device Id: {self.id} Temperature: {self.temperature} Status: {self.status}"
 
 
 class SecurityCamera(Device):
@@ -66,6 +90,9 @@ class SecurityCamera(Device):
 
     def set_security_status(self, status):
         self.__securityStatus = status
+
+    def __str__(self):
+        return f"Device: Security Camera Device Id: {self.id} Security Status: {self.__securityStatus} Status: {self.status}"
 
 
 class AutomationSystem:
@@ -118,12 +145,17 @@ auto = AutomationSystem()
 cam = SecurityCamera("Camera1")
 light = SmartLight("Light1")
 thermo = Thermostat("Thermostat1")
-print(light.__str__())
-light.adjust_brightness(40)
-print(light.__str__())
-light.adjust_brightness(0)
-print(light.__str__())
+# print(light.__str__())
+# light.adjust_brightness(40)
+# print(light.__str__())
+# light.adjust_brightness(0)
+# print(light.__str__())
 
-auto.add_device(cam)
-auto.add_device(light)
-auto.add_device(thermo)
+# auto.add_device(cam)
+# auto.add_device(light)
+# auto.add_device(thermo)
+
+print(light.__str__())
+light.adjust_brightness(30)
+print(light.__str__())
+light.gradual_dimming(0, 10)
