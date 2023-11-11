@@ -11,10 +11,9 @@ class SmartHomeGUI(tk.Tk):
         super().__init__()
 
         self.title("Smart Home IoT Simulator")
-        self.geometry("400x200")
+        self.geometry("800x1000")
         self.configure(bg="#2b2b2b")
 
-        # Title Label
         title_label = tk.Label(
             self,
             text="Smart Home IoT Simulator",
@@ -24,7 +23,6 @@ class SmartHomeGUI(tk.Tk):
         )
         title_label.pack(pady=20)
 
-        # Automation Status Button
         self.automation_status = "Off"
         automation_status_button = tk.Button(
             self,
@@ -36,7 +34,6 @@ class SmartHomeGUI(tk.Tk):
         )
         automation_status_button.pack(pady=10, side="top")
 
-        # Automation Status Label
         self.automation_status_label = tk.Label(
             self,
             text=f"Automation Status: {self.automation_status}",
@@ -46,25 +43,21 @@ class SmartHomeGUI(tk.Tk):
         )
         self.automation_status_label.pack(pady=10, side="top")
 
-        # Devices Status Text Area
         self.devices_status_text = tk.Text(self, height=8, width=40)
         self.devices_status_text.pack(side="top")
 
-        # Create instances of devices
         self.smart_light = SmartLight("Living room light")
         self.thermostat = Thermostat("Living room thermostat")
+        self.security_camera = SecurityCamera("Main entrance camera")
 
-        # StringVar to track the status
         self.smart_light_status_var = tk.StringVar()
         self.smart_light_status_var.set(f"SmartLight Status: {self.smart_light.status}")
 
         self.thermostat_status_var = tk.StringVar()
         self.thermostat_status_var.set(f"Thermostat Status: {self.thermostat.status}")
 
-        # Display current devices
         self.display_current_devices()
 
-        # Living Room Brightness Label
         living_room_brightness_label = tk.Label(
             self,
             text="Living Room Brightness",
@@ -74,17 +67,15 @@ class SmartHomeGUI(tk.Tk):
         )
         living_room_brightness_label.pack(pady=5, side="top")
 
-        # Brightness Level Label
         self.brightness_level_label = tk.Label(
             self,
-            text="Brightness Level: 0",  # Initial brightness level
+            text="Brightness Level: 0",
             font=("Helvetica", 10),
             fg="#fb542b",
             bg="#2b2b2b",
         )
         self.brightness_level_label.pack(pady=5, side="top")
 
-        # Brightness Adjustment Scale
         self.brightness_scale = tk.Scale(
             self,
             from_=0,
@@ -92,11 +83,10 @@ class SmartHomeGUI(tk.Tk):
             orient=tk.HORIZONTAL,
             length=200,
             sliderlength=15,
-            command=self.update_brightness,  # Update brightness of SmartLight
+            command=self.update_brightness,
         )
         self.brightness_scale.pack(pady=10)
 
-        # Toggle On/Off Button
         toggle_button = tk.Button(
             self,
             text="Toggle On/Off",
@@ -107,7 +97,6 @@ class SmartHomeGUI(tk.Tk):
         )
         toggle_button.pack(pady=10)
 
-        # Thermostat Temperature Label
         thermostat_temperature_label = tk.Label(
             self,
             text="Thermostat Temperature",
@@ -117,17 +106,15 @@ class SmartHomeGUI(tk.Tk):
         )
         thermostat_temperature_label.pack(pady=5, side="top")
 
-        # Temperature Level Label
         self.temperature_level_label = tk.Label(
             self,
-            text="Temperature Level: 0",  # Initial temperature level
+            text="Temperature Level: 0",
             font=("Helvetica", 10),
             fg="#fb542b",
             bg="#2b2b2b",
         )
         self.temperature_level_label.pack(pady=5, side="top")
 
-        # Temperature Adjustment Scale
         self.temperature_scale = tk.Scale(
             self,
             from_=0,
@@ -135,11 +122,10 @@ class SmartHomeGUI(tk.Tk):
             orient=tk.HORIZONTAL,
             length=200,
             sliderlength=15,
-            command=self.update_temperature,  # Update temperature of Thermostat
+            command=self.update_temperature,
         )
         self.temperature_scale.pack(pady=10)
 
-        # Toggle On/Off Button for Thermostat
         thermostat_toggle_button = tk.Button(
             self,
             text="Toggle On/Off",
@@ -150,52 +136,92 @@ class SmartHomeGUI(tk.Tk):
         )
         thermostat_toggle_button.pack(pady=10)
 
+        security_camera_status_label = tk.Label(
+            self,
+            text="Security Camera Status",
+            font=("Helvetica", 10),
+            fg="#fb542b",
+            bg="#2b2b2b",
+        )
+        security_camera_status_label.pack(pady=5, side="top")
+
+        self.motion_status_label = tk.Label(
+            self,
+            text="Motion Status: No motion",
+            font=("Helvetica", 10),
+            fg="#fb542b",
+            bg="#2b2b2b",
+        )
+        self.motion_status_label.pack(pady=5, side="top")
+
+        motion_button = tk.Button(
+            self,
+            text="Random Detect Motion",
+            font=("Helvetica", 10, "bold"),
+            fg="#fb542b",
+            bg="#2b2b2b",
+            command=self.toggle_motion,
+        )
+        motion_button.pack(pady=10)
+
+        security_camera_toggle_button = tk.Button(
+            self,
+            text="Toggle On/Off",
+            font=("Helvetica", 10, "bold"),
+            fg="#fb542b",
+            bg="#2b2b2b",
+            command=self.toggle_security_camera,
+        )
+        security_camera_toggle_button.pack(pady=10)
+
+        self.sensor_data_text = tk.Text(self, height=8, width=40)
+        self.sensor_data_text.pack(side="top")
+
+        self.security_camera_status_var = tk.StringVar()
+        self.security_camera_status_var.set("Off")
+
+    def log_sensor_data(self, device):
+            data = device.get_data()
+            self.sensor_data_text.insert(tk.END, f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {data}\n")
+            self.sensor_data_text.yview(tk.END)
+
     def update_brightness(self, value):
-        self.smart_light.adjust_brightness(float(value))  # Update brightness of SmartLight
-        self.brightness_level_label["text"] = f"Brightness Level: {value}"  # Update label
-        self.smart_light_status_var.set(f"SmartLight Status: {self.smart_light.status}")  # Update status label
-        self.update_status_textarea()  # Update status in textarea
+        self.smart_light.adjust_brightness(float(value))
+        self.brightness_level_label["text"] = f"Brightness Level: {value}"
+        self.smart_light_status_var.set(f"SmartLight Status: {self.smart_light.status}")
+        self.update_status_textarea()
+        self.log_sensor_data(self.smart_light)
 
     def toggle_smart_light(self):
-        if self.smart_light.status == "On":
+        if self.smart_light.status == "on":
             self.smart_light.turn_off()
-            self.smart_light.adjust_brightness(0)  # Set brightness to 0 when turned off
+            self.smart_light.adjust_brightness(0)
         else:
             self.smart_light.turn_on()
 
-        self.smart_light_status_var.set(f"SmartLight Status: {self.smart_light.status}")  # Update status label
-        self.brightness_scale.set(self.smart_light.brightness)  # Update brightness scale
-        self.update_status_textarea()  # Update status in textarea
+        self.smart_light_status_var.set(f"SmartLight Status: {self.smart_light.status}")
+        self.brightness_scale.set(self.smart_light.brightness)
+        self.update_status_textarea()
+        self.log_sensor_data(self.smart_light)
 
     def update_temperature(self, value):
-        self.thermostat.set_temperature(float(value))  # Update temperature of Thermostat
-        self.temperature_level_label["text"] = f"Temperature Level: {value}"  # Update label
-        self.thermostat_status_var.set(f"Thermostat Status: {self.thermostat.status}")  # Update status label
-        self.update_status_textarea()  # Update status in textarea
+        self.thermostat.set_temperature(float(value))
+        self.temperature_level_label["text"] = f"Temperature Level: {value}"
+        self.thermostat_status_var.set(f"Thermostat Status: {self.thermostat.status}")
+        self.update_status_textarea()
+        self.log_sensor_data(self.thermostat)
 
     def toggle_thermostat(self):
-        if self.thermostat.status == "On":
+        if self.thermostat.status == "on":
             self.thermostat.turn_off()
-            self.thermostat.set_temperature(0)  # Set temperature to 0 when turned off
+            self.thermostat.set_temperature(0)
         else:
             self.thermostat.turn_on()
 
-        self.thermostat_status_var.set(f"Thermostat Status: {self.thermostat.status}")  # Update status label
-        self.temperature_scale.set(self.thermostat.temperature)  # Update temperature scale
-        self.update_status_textarea()  # Update status in textarea
-
-    def update_status_textarea(self):
-        self.devices_status_text.delete(1.0, tk.END)
-        devices = [self.smart_light, self.thermostat]
-        for device in devices:
-            status_info = f"{device.id}: {device.device_type}    Status: {device.status}"
-
-            if isinstance(device, SmartLight):
-                status_info += f"    Brightness: {device.brightness}"
-            elif isinstance(device, Thermostat):
-                status_info += f"    Temperature: {device.temperature}"
-
-            self.devices_status_text.insert(tk.END, status_info + "\n")
+        self.thermostat_status_var.set(f"Thermostat Status: {self.thermostat.status}")
+        self.temperature_scale.set(self.thermostat.temperature)
+        self.update_status_textarea()
+        self.log_sensor_data(self.thermostat)
 
     def toggle_automation_status(self):
         if self.automation_status == "Off":
@@ -205,11 +231,47 @@ class SmartHomeGUI(tk.Tk):
         self.automation_status_label["text"] = f"Automation Status: {self.automation_status}"
         self.display_current_devices()
 
+    def toggle_security_camera(self):
+        if self.security_camera.status == "On":
+            self.security_camera.turn_off()
+            self.security_camera.set_security_status("No motion")
+        else:
+            self.security_camera.turn_on()
+
+        self.security_camera_status_var.set(
+            "On" if self.security_camera.status == "on" else "Off"
+        )
+        self.update_status_textarea()
+        self.log_sensor_data(self.security_camera)
+
+    def toggle_motion(self):
+        status = random.choice(["Detected motion", "No motion"])
+        self.security_camera.set_security_status(status)
+
+        self.motion_status_label["text"] = f"Motion Status: {status}"
+        self.update_status_textarea()
+        self.log_sensor_data(self.security_camera)
+
     def display_current_devices(self):
         self.devices_status_text.delete(1.0, tk.END)
         devices = [self.smart_light, self.thermostat]
         for device in devices:
             self.devices_status_text.insert(tk.END, f"{device.id}: {device.device_type}    Status: {device.status}\n")
+
+    def update_status_textarea(self):
+        self.devices_status_text.delete(1.0, tk.END)
+        devices = [self.smart_light, self.thermostat, self.security_camera]
+        for device in devices:
+            status_info = f"{device.id}: {device.device_type}    Status: {device.status}"
+
+            if isinstance(device, SmartLight):
+                status_info += f"    Brightness: {device.brightness}"
+            elif isinstance(device, Thermostat):
+                status_info += f"    Temperature: {device.temperature}"
+            elif isinstance(device, SecurityCamera):
+                status_info += f"    Security Status: {device.get_security_status()}"
+
+            self.devices_status_text.insert(tk.END, status_info + "\n")
 
 
 class Device:
@@ -245,7 +307,7 @@ class SmartLight(Device):
         return self.__brightness
 
     @property
-    def device_type(self):  # Add this property
+    def device_type(self):
         return self.__device_type
 
     def log_data(self):
@@ -308,7 +370,7 @@ class Thermostat(Device):
                 self.log_data()
 
     @property
-    def device_type(self):  # Add this property
+    def device_type(self):
         return self.__device_type
 
     def log_data(self):
@@ -328,6 +390,11 @@ class SecurityCamera(Device):
     def __init__(self, device_id: str):
         super().__init__(device_id)
         self.__securityStatus = "No motion"
+        self.__device_type = "SecurityCamera"
+
+    @property
+    def device_type(self):
+        return self.__device_type
 
     def get_security_status(self):
         return self.__securityStatus
