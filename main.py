@@ -1,5 +1,6 @@
 import random
 import time
+import datetime
 
 
 class Device:
@@ -46,7 +47,9 @@ class SmartLight(Device):
 
     def gradual_dimming(self, target_brightness: int, duration: float):
         if target_brightness > self.brightness:
-            raise LightException("The target brightness cannot be greater than the brightness of the device")
+            raise LightException(
+                "The target brightness cannot be greater than the brightness of the device"
+            )
         elif target_brightness < 0:
             raise LightException("Target brightness cannot be less than 0")
         else:
@@ -58,6 +61,14 @@ class SmartLight(Device):
 
     def __str__(self) -> str:
         return f"Device: Smart Light Device Id: {self.id} Brightness: {self.brightness} Status: {self.status}"
+
+    def gather_data(self):
+        return {
+            "time": datetime.datetime.now().isoformat(),
+            "device_id": self.id,
+            "status": self.status,
+            "brightness": self.brightness,
+        }
 
 
 class Thermostat(Device):
@@ -76,6 +87,14 @@ class Thermostat(Device):
                 self.turn_off()
                 self.temperature = temp
 
+    def gather_data(self):
+        return {
+            "time": datetime.datetime.now().isoformat(),
+            "device_id": self.id,
+            "status": self.status,
+            "temperature": self.temperature,
+        }
+
     def __str__(self):
         return f"Device: Thermostat Device Id: {self.id} Temperature: {self.temperature} Status: {self.status}"
 
@@ -90,6 +109,14 @@ class SecurityCamera(Device):
 
     def set_security_status(self, status):
         self.__securityStatus = status
+
+    def gather_data(self):
+        return {
+            "time": datetime.datetime.now().isoformat(),
+            "device_id": self.id,
+            "status": self.status,
+            "security_status": self.get_security_status(),
+        }
 
     def __str__(self):
         return f"Device: Security Camera Device Id: {self.id} Security Status: {self.__securityStatus} Status: {self.status}"
@@ -145,15 +172,6 @@ auto = AutomationSystem()
 cam = SecurityCamera("Camera1")
 light = SmartLight("Light1")
 thermo = Thermostat("Thermostat1")
-# print(light.__str__())
-# light.adjust_brightness(40)
-# print(light.__str__())
-# light.adjust_brightness(0)
-# print(light.__str__())
-
-# auto.add_device(cam)
-# auto.add_device(light)
-# auto.add_device(thermo)
 
 print(light.__str__())
 light.adjust_brightness(30)
