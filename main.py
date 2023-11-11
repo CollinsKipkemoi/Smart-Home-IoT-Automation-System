@@ -1,6 +1,7 @@
 import random
 import time
 import datetime
+import json
 
 
 class Device:
@@ -34,7 +35,13 @@ class SmartLight(Device):
     def brightness(self):
         return self.__brightness
 
-    def adjust_brightness(self, brightness: int):
+    def log_data(self):
+        data = self.gather_data()
+        with open("sensor_data.json", "a") as f:
+            json.dump(data, f)
+            f.write("\n")
+
+    def adjust_brightness(self, brightness: float):
         if brightness > 100 or brightness < 0:
             raise LightException(
                 "Brightness level cannot be more than 100 or less than 0"
@@ -44,6 +51,7 @@ class SmartLight(Device):
         self.__brightness = brightness
         if brightness == 0:
             self.turn_off()
+        self.log_data()
 
     def gradual_dimming(self, target_brightness: int, duration: float):
         if target_brightness > self.brightness:
@@ -57,6 +65,7 @@ class SmartLight(Device):
             while self.brightness > target_brightness:
                 self.adjust_brightness(self.brightness - steps)
                 time.sleep(1)
+                self.log_data()
                 print(self.__str__())
 
     def __str__(self) -> str:
@@ -83,9 +92,17 @@ class Thermostat(Device):
             if temp > 0:
                 self.turn_on()
                 self.temperature = temp
+                self.log_data()
             else:
                 self.turn_off()
                 self.temperature = temp
+                self.log_data()
+
+    def log_data(self):
+        data = self.gather_data()
+        with open("sensor_data.json", "a") as f:
+            json.dump(data, f)
+            f.write("\n")
 
     def gather_data(self):
         return {
@@ -109,6 +126,12 @@ class SecurityCamera(Device):
 
     def set_security_status(self, status):
         self.__securityStatus = status
+
+    def log_data(self):
+        data = self.gather_data()
+        with open("sensor_data.json", "a") as f:
+            json.dump(data, f)
+            f.write("\n")
 
     def gather_data(self):
         return {
@@ -177,3 +200,4 @@ print(light.__str__())
 light.adjust_brightness(30)
 print(light.__str__())
 light.gradual_dimming(0, 10)
+print(light.gather_data())
